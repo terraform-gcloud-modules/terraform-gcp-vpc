@@ -1,8 +1,8 @@
 <!-- BEGIN_TF_DOCS -->
 
-# Terraform GCP Module Template
+# Terraform GCP VPC
 
-This directory contains an example usage of the **terraform-gcp-module-template**. It demonstrates how to use the module with default settings or with custom configurations.
+This directory contains an example usage of the **terraform-gcp-vpc**. It demonstrates how to use the module with default settings or with custom configurations.
 
 ---
 
