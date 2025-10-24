@@ -93,34 +93,6 @@ variable "module_depends_on" {
 
 }
 
-variable "bgp_best_path_selection_mode" {
-  description = "Specifies how the best path is selected in BGP"
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.bgp_best_path_selection_mode == null || try(contains(["LEGACY", "STANDARD", ""], var.bgp_best_path_selection_mode), false)
-    error_message = "bgp_best_path_selection_mode must be one of LEGACY, STANDARD, or empty string."
-  }
-}
-
-variable "bgp_always_compare_med" {
-  description = "If true, BGP will always compare MED values across different AS numbers"
-  type        = bool
-  default     = false
-}
-
-variable "bgp_inter_region_cost" {
-  description = "BGP inter-region cost mode"
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.bgp_inter_region_cost == null || try(contains(["DEFAULT", "ADD_COST_TO_MED", ""], var.bgp_inter_region_cost), false)
-    error_message = "bgp_inter_region_cost must be one of DEFAULT, ADD_COST_TO_MED, or empty string."
-  }
-}
-
 #---------------------------------------------------------------------------------------------------------
 # shared_vpc_variable #
 #----------------------------------------------------------------------------------------------------------
@@ -166,4 +138,16 @@ variable "enable_service_networking" {
   description = "Whether to enable service networking"
   type        = bool
   default     = true
+}
+
+variable "google_compute_network_enabled" {
+  type        = bool
+  default     = true
+  description = "Specifies whether the Google Compute Engine network should be enabled"
+}
+
+variable "enabled" {
+  type        = bool
+  default     = true
+  description = "Set to false to prevent the module from creating any resources."
 }

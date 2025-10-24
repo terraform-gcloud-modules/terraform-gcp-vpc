@@ -10,8 +10,8 @@ This directory contains an example usage of the **terraform-gcp-vpc**. It demons
 
 | Name      | Version   |
 |-----------|-----------|
-| Terraform | >= 1.6.6  |
-| GCP       | >= 6.49.1 |
+| Terraform | >= 1.12  |
+| GCP       | >= 4.64, < 8 |
 
 ---
 

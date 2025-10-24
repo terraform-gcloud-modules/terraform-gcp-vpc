@@ -4,7 +4,7 @@ on:
 jobs:
   auto-merge:
     uses: clouddrove/github-shared-workflows/.github/workflows/auto_merge.yml@master
-    secrets:
-      GITHUB: ${{ secrets.GITHUB }}
     with:
-      tfcheck: 'examples/**'
+      tfcheck: 'examples/complete/**'
+    secrets:
+      GITHUB: ${{ secrets.GITHUB_TOKEN }}

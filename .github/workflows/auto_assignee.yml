@@ -8,9 +8,8 @@ on:
 jobs:
   assignee:
     uses: clouddrove/github-shared-workflows/.github/workflows/auto_assignee.yml@master
-
+    with:
+      assignees: "clouddrove-ci"
+      reviewers: "@terraform-gcloud-modules/approvers"
     secrets:
       GITHUB: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      assignees: 'clouddrove-ci'
-      reviewers: '@terraform-gcloud-modules/approvers'
