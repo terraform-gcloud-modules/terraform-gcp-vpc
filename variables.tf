@@ -151,3 +151,91 @@ variable "enabled" {
   default     = true
   description = "Set to false to prevent the module from creating any resources."
 }
+
+variable "enable_static_route" {
+  type        = bool
+  default     = false
+  description = "Enable or disable creation of a static route in the VPC."
+}
+
+variable "route_name" {
+  type        = string
+  description = "Name of the static route to be created."
+}
+
+variable "route_description" {
+  type        = string
+  default     = "Static route"
+  description = "Description of the static route."
+}
+
+variable "route_dest_range" {
+  type        = string
+  description = "Destination IPv4 CIDR range for the static route (e.g., 0.0.0.0/0)."
+}
+
+variable "route_priority" {
+  type        = number
+  default     = 1000
+  description = "Priority of the route (0–65535). Lower values have higher precedence."
+}
+
+variable "next_hop_gateway" {
+  type        = string
+  default     = "default-internet-gateway"
+  description = "Next hop gateway for the route. Use 'default-internet-gateway' for internet access."
+}
+
+variable "route_tags" {
+  type        = list(string)
+  default     = []
+  description = "List of instance network tags to which this route will apply. Leave empty to apply to all instances."
+}
+
+variable "enable_nat" {
+  type        = bool
+  default     = false
+  description = "Enable or disable Cloud NAT for the VPC. Set to true to create NAT resources."
+}
+
+variable "region" {
+  type        = string
+  default     = "us-central1"
+  description = "The region in which the Cloud NAT and Cloud Router will be deployed."
+}
+
+variable "nat_ip_allocate_option" {
+  type        = string
+  default     = "AUTO_ONLY"
+  description = "Specifies how NAT IPs are allocated. Options: 'AUTO_ONLY' for automatic IP allocation, 'MANUAL_ONLY' for manually specified IPs."
+}
+
+variable "source_subnetwork_ip_ranges_to_nat" {
+  type        = string
+  default     = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+  description = "Determines which IP ranges in the subnetworks should use NAT. Options include 'ALL_SUBNETWORKS_ALL_IP_RANGES' or a list of specific subnetwork IP ranges."
+}
+
+variable "min_ports_per_vm" {
+  type        = number
+  default     = 64
+  description = "Minimum number of NAT ports allocated per VM. This defines how many simultaneous outbound connections a VM can make through NAT."
+}
+
+variable "nat_log_enable" {
+  type        = bool
+  default     = false
+  description = "Enable or disable logging for Cloud NAT. Set to true to log NAT activity."
+}
+
+variable "nat_log_filter" {
+  type        = string
+  default     = "ALL"
+  description = "Filter for NAT logs. Options: 'ALL', 'ERRORS_ONLY', 'TRANSLATIONS_ONLY'."
+}
+
+variable "nat_network_tier" {
+  type        = string
+  default     = "PREMIUM"
+  description = "Network Service Tier for Cloud NAT. Options: PREMIUM or STANDARD."
+}
