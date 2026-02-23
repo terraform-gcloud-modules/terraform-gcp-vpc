@@ -5,7 +5,7 @@
 
 module "labels" {
   source = "git::https://github.com/terraform-gcloud-modules/terraform-gcp-labels.git?ref="
-  
+
   name        = var.name
   environment = var.environment
   label_order = var.label_order
@@ -77,14 +77,14 @@ resource "google_service_networking_connection" "default" {
 #-------------------------------------------------------------------------------
 
 resource "google_compute_route" "static_route" {
-  count       = var.enable_static_route && var.module_enabled && var.google_compute_network_enabled ? 1 : 0
+  count = var.enable_static_route && var.module_enabled && var.google_compute_network_enabled ? 1 : 0
 
   name        = var.route_name
   description = var.route_description
 
-  network     = google_compute_network.vpc[0].name
-  dest_range  = var.route_dest_range
-  priority    = var.route_priority
+  network    = google_compute_network.vpc[0].name
+  dest_range = var.route_dest_range
+  priority   = var.route_priority
 
   next_hop_gateway = var.next_hop_gateway
 
@@ -103,15 +103,15 @@ resource "google_compute_router" "nat_router" {
 }
 
 resource "google_compute_router_nat" "nat" {
-  count   = var.enable_nat && var.module_enabled && var.google_compute_network_enabled ? 1 : 0
-  name    = "${module.labels.id}-nat"
-  router  = google_compute_router.nat_router[0].name
-  region  = var.region
+  count  = var.enable_nat && var.module_enabled && var.google_compute_network_enabled ? 1 : 0
+  name   = "${module.labels.id}-nat"
+  router = google_compute_router.nat_router[0].name
+  region = var.region
 
-  nat_ip_allocate_option = var.nat_ip_allocate_option # "AUTO_ONLY" or "MANUAL_ONLY"
+  nat_ip_allocate_option             = var.nat_ip_allocate_option             # "AUTO_ONLY" or "MANUAL_ONLY"
   source_subnetwork_ip_ranges_to_nat = var.source_subnetwork_ip_ranges_to_nat # "ALL_SUBNETWORKS_ALL_IP_RANGES" or list of subnetworks
 
-  min_ports_per_vm        = var.min_ports_per_vm
+  min_ports_per_vm = var.min_ports_per_vm
 
   auto_network_tier = var.nat_network_tier
 
