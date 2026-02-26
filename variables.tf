@@ -146,12 +146,6 @@ variable "google_compute_network_enabled" {
   description = "Specifies whether the Google Compute Engine network should be enabled"
 }
 
-variable "enabled" {
-  type        = bool
-  default     = true
-  description = "Set to false to prevent the module from creating any resources."
-}
-
 variable "enable_static_route" {
   type        = bool
   default     = false
