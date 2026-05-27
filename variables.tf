@@ -16,7 +16,7 @@ variable "label_order" {
 
 variable "project_id" {
   type        = string
-  default     = ""
+  default     = "clouddrove-123"
   description = "(Optional) The ID of the project in which the resource belongs. If it is not set, the provider project is used."
 }
 
@@ -121,23 +121,25 @@ variable "google_compute_shared_vpc_host_enabled" {
 
 variable "enable_private_ip_alloc" {
   type        = bool
-  default     = true
+  default     = false
   description = "Enable allocation of a private IP address range for VPC peering."
 }
 
 variable "private_ip_alloc_name" {
   description = "List of names for the private IP allocations"
   type        = list(string)
+  default     = []
 }
 
 variable "prefix_length" {
   description = "List of prefix lengths for the private IP allocations"
   type        = list(number)
+  default     = []
 }
 variable "enable_service_networking" {
   description = "Whether to enable service networking"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "google_compute_network_enabled" {
@@ -147,45 +149,29 @@ variable "google_compute_network_enabled" {
 }
 
 variable "enable_static_route" {
+  description = "Set to true to create one or more static routes."
   type        = bool
   default     = false
-  description = "Enable or disable creation of a static route in the VPC."
 }
 
-variable "route_name" {
-  type        = string
-  description = "Name of the static route to be created."
-}
-
-variable "route_description" {
-  type        = string
-  default     = "Static route"
-  description = "Description of the static route."
-}
-
-variable "route_dest_range" {
-  type        = string
-  description = "Destination IPv4 CIDR range for the static route (e.g., 0.0.0.0/0)."
-}
-
-variable "route_priority" {
-  type        = number
-  default     = 1000
-  description = "Priority of the route (0–65535). Lower values have higher precedence."
-}
-
-variable "next_hop_gateway" {
-  type        = string
-  default     = "default-internet-gateway"
-  description = "Next hop gateway for the route. Use 'default-internet-gateway' for internet access."
-}
-
-variable "route_tags" {
-  type        = list(string)
+variable "static_routes" {
+  description = <<-EOT
+    List of static route objects. Each supports:
+      name                (required) - Unique route name
+      dest_range          (required) - Destination CIDR (e.g. "0.0.0.0/0")
+      description         (optional)
+      priority            (optional, default 1000)
+      tags                (optional) list of network tags to apply route to
+      next_hop_gateway    (optional) - e.g. "default-internet-gateway"
+      next_hop_ip         (optional) - IP of next hop
+      next_hop_instance   (optional) - Self link of next hop instance
+      next_hop_vpn_tunnel (optional) - Self link of VPN tunnel
+      next_hop_ilb        (optional) - IP or self link of internal LB
+    Only ONE next_hop_* should be set per route.
+  EOT
+  type        = any
   default     = []
-  description = "List of instance network tags to which this route will apply. Leave empty to apply to all instances."
 }
-
 variable "enable_nat" {
   type        = bool
   default     = false
@@ -210,6 +196,12 @@ variable "source_subnetwork_ip_ranges_to_nat" {
   description = "Determines which IP ranges in the subnetworks should use NAT. Options include 'ALL_SUBNETWORKS_ALL_IP_RANGES' or a list of specific subnetwork IP ranges."
 }
 
+variable "nat_subnetworks" {
+  description = "Explicit subnet list for NAT. Used only when source_subnetwork_ip_ranges_to_nat = LIST_OF_SUBNETWORKS. Each object: { name, source_ip_ranges_to_nat }."
+  type        = any
+  default     = []
+}
+
 variable "min_ports_per_vm" {
   type        = number
   default     = 64
@@ -228,8 +220,49 @@ variable "nat_log_filter" {
   description = "Filter for NAT logs. Options: 'ALL', 'ERRORS_ONLY', 'TRANSLATIONS_ONLY'."
 }
 
+variable "max_ports_per_vm" {
+  description = "Maximum number of NAT ports allocated per VM. null means no limit (dynamic port allocation)."
+  type        = number
+  default     = null
+}
+
+variable "enable_endpoint_independent_mapping" {
+  description = "Enable endpoint-independent mapping on the NAT. Recommended false unless required for specific application compatibility."
+  type        = bool
+  default     = null
+}
+
+variable "tcp_established_idle_timeout_sec" {
+  description = "Timeout (seconds) for established TCP connections through NAT. Default GCP value is 1200."
+  type        = number
+  default     = null
+}
+
+variable "tcp_transitory_idle_timeout_sec" {
+  description = "Timeout (seconds) for transitory TCP connections through NAT. Default GCP value is 30."
+  type        = number
+  default     = null
+}
+
+variable "udp_idle_timeout_sec" {
+  description = "Timeout (seconds) for UDP connections through NAT. Default GCP value is 30."
+  type        = number
+  default     = null
+}
+
+variable "icmp_idle_timeout_sec" {
+  description = "Timeout (seconds) for ICMP connections through NAT. Default GCP value is 30."
+  type        = number
+  default     = null
+}
+
 variable "nat_network_tier" {
+  description = "Network tier for NAT external IPs. PREMIUM for global routing (recommended). STANDARD for regional."
   type        = string
   default     = "PREMIUM"
-  description = "Network Service Tier for Cloud NAT. Options: PREMIUM or STANDARD."
+
+  validation {
+    condition     = contains(["PREMIUM", "STANDARD"], var.nat_network_tier)
+    error_message = "nat_network_tier must be PREMIUM or STANDARD."
+  }
 }

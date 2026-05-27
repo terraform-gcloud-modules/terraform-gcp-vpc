@@ -59,6 +59,7 @@ resource "google_compute_global_address" "private_ip_alloc" {
   address_type  = "INTERNAL"
   prefix_length = var.prefix_length[count.index]
   network       = google_compute_network.vpc[0].self_link
+  project       = var.project_id
 }
 
 #-------------------------------------------------------------------------------
@@ -69,7 +70,8 @@ resource "google_service_networking_connection" "default" {
   count                   = var.enable_service_networking ? 1 : 0
   network                 = google_compute_network.vpc[0].self_link
   service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = var.enable_service_networking ? [google_compute_global_address.private_ip_alloc[0].name] : []
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc[0].name]
+  depends_on              = [google_compute_global_address.private_ip_alloc]
 }
 
 #-------------------------------------------------------------------------------
@@ -77,19 +79,26 @@ resource "google_service_networking_connection" "default" {
 #-------------------------------------------------------------------------------
 
 resource "google_compute_route" "static_route" {
-  count = var.enable_static_route && var.module_enabled && var.google_compute_network_enabled ? 1 : 0
+  count = var.enable_static_route && var.module_enabled && var.google_compute_network_enabled ? length(var.static_routes) : 0
 
-  name        = var.route_name
-  description = var.route_description
+  name        = var.static_routes[count.index].name
+  description = lookup(var.static_routes[count.index], "description", null)
+  network     = google_compute_network.vpc[0].name
+  project     = var.project_id
+  dest_range  = var.static_routes[count.index].dest_range
+  priority    = lookup(var.static_routes[count.index], "priority", 1000)
+  tags        = lookup(var.static_routes[count.index], "tags", [])
 
-  network    = google_compute_network.vpc[0].name
-  dest_range = var.route_dest_range
-  priority   = var.route_priority
+  # Only one next_hop_* should be set at a time
+  next_hop_gateway    = lookup(var.static_routes[count.index], "next_hop_gateway", null)
+  next_hop_ip         = lookup(var.static_routes[count.index], "next_hop_ip", null)
+  next_hop_instance   = lookup(var.static_routes[count.index], "next_hop_instance", null)
+  next_hop_vpn_tunnel = lookup(var.static_routes[count.index], "next_hop_vpn_tunnel", null)
+  next_hop_ilb        = lookup(var.static_routes[count.index], "next_hop_ilb", null)
 
-  next_hop_gateway = var.next_hop_gateway
-
-  tags = var.route_tags
+  depends_on = [google_compute_network.vpc]
 }
+
 
 #-------------------------------------------------------------------------------
 # Cloud NAT Configuration
@@ -100,23 +109,42 @@ resource "google_compute_router" "nat_router" {
   name    = "${module.labels.id}-nat-router"
   network = google_compute_network.vpc[0].self_link
   region  = var.region
+  project = var.project_id
 }
 
 resource "google_compute_router_nat" "nat" {
-  count  = var.enable_nat && var.module_enabled && var.google_compute_network_enabled ? 1 : 0
-  name   = "${module.labels.id}-nat"
-  router = google_compute_router.nat_router[0].name
-  region = var.region
+  count   = var.enable_nat && var.module_enabled && var.google_compute_network_enabled ? 1 : 0
+  name    = "${module.labels.id}-nat"
+  router  = google_compute_router.nat_router[0].name
+  region  = var.region
+  project = var.project_id
+
 
   nat_ip_allocate_option             = var.nat_ip_allocate_option             # "AUTO_ONLY" or "MANUAL_ONLY"
   source_subnetwork_ip_ranges_to_nat = var.source_subnetwork_ip_ranges_to_nat # "ALL_SUBNETWORKS_ALL_IP_RANGES" or list of subnetworks
 
-  min_ports_per_vm = var.min_ports_per_vm
+  min_ports_per_vm                    = var.min_ports_per_vm
+  max_ports_per_vm                    = var.max_ports_per_vm
+  enable_endpoint_independent_mapping = var.enable_endpoint_independent_mapping
+  tcp_established_idle_timeout_sec    = var.tcp_established_idle_timeout_sec
+  tcp_transitory_idle_timeout_sec     = var.tcp_transitory_idle_timeout_sec
+  udp_idle_timeout_sec                = var.udp_idle_timeout_sec
+  icmp_idle_timeout_sec               = var.icmp_idle_timeout_sec
+  auto_network_tier                   = var.nat_network_tier
 
-  auto_network_tier = var.nat_network_tier
+  # Used when source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+  dynamic "subnetwork" {
+    for_each = var.source_subnetwork_ip_ranges_to_nat == "LIST_OF_SUBNETWORKS" ? var.nat_subnetworks : []
+    content {
+      name                    = subnetwork.value.name
+      source_ip_ranges_to_nat = subnetwork.value.source_ip_ranges_to_nat
+    }
+  }
 
   log_config {
     enable = var.nat_log_enable
-    filter = var.nat_log_filter # "ALL", "ERRORS_ONLY", "TRANSLATIONS_ONLY"
+    filter = var.nat_log_filter
   }
+
+  depends_on = [google_compute_router.nat_router]
 }

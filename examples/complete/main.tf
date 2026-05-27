@@ -1,67 +1,88 @@
-provider "google" {
-  project = var.gcp_project_id
-  region  = var.gcp_region
-  zone    = var.gcp_zone
-}
-
 #-------------------------------------------------------------------------------
-# Module "vpc" Configuration
+# main.tf
 #-------------------------------------------------------------------------------
-
-locals {
-  name        = "vpc"
-  environment = "dev"
-  label_order = ["environment", "name"]
-  project_id  = "project-id"
-}
-
 module "vpc" {
-  source = "../.."
+  source      = "../.."
+  name        = var.name
+  environment = var.environment
+  label_order = ["name", "environment"]
+  project_id  = var.project_id
 
-  # Module control
   module_enabled                 = true
   google_compute_network_enabled = true
-  enable_service_networking      = false
 
-  # General settings
-  name        = local.name
-  description = "VPC network for dev and testing workloads"
-  project_id  = local.project_id
-  environment = local.environment
-  label_order = local.label_order
-
-  # Network configuration
+  #---------------------------------------------------------------------------
+  # VPC Network
+  #---------------------------------------------------------------------------
+  description                     = "Core VPC for ${var.name} (${var.environment})"
   auto_create_subnetworks         = false
-  routing_mode                    = "GLOBAL"
+  routing_mode                    = "REGIONAL"
   mtu                             = 1460
   delete_default_routes_on_create = false
   enable_ula_internal_ipv6        = false
-  internal_ipv6_range             = null
 
-  # Shared VPC
+  #---------------------------------------------------------------------------
+  # Cloud NAT + Cloud Router
+  # Subnets will be NATed via their subnet module referencing this VPC.
+  #---------------------------------------------------------------------------
+  enable_nat                          = true
+  region                              = var.region
+  nat_ip_allocate_option              = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat  = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+  min_ports_per_vm                    = 64
+  max_ports_per_vm                    = 4096
+  enable_endpoint_independent_mapping = false
+  nat_network_tier                    = "PREMIUM"
+  nat_log_enable                      = true
+  nat_log_filter                      = "ERRORS_ONLY"
+
+  # Uncomment for MANUAL_ONLY NAT IPs:
+  # nat_ip_allocate_option = "MANUAL_ONLY"
+  # nat_ips                = ["<self_link_of_reserved_static_ip>"]
+
+  # Uncomment to NAT only specific subnets:
+  # source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+  # nat_subnetworks = [
+  #   {
+  #     name                    = "projects/my-project/regions/us-central1/subnetworks/my-subnet"
+  #     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  #   }
+  # ]
+
+  # BGP config — required if you attach a VPN or Interconnect to this router
+  # router_bgp = {
+  #   asn            = 64514
+  #   advertise_mode = "DEFAULT"
+  # }
+
+  #---------------------------------------------------------------------------
+  # Private IP Allocation for Cloud SQL 
+  #---------------------------------------------------------------------------
+  enable_private_ip_alloc = true
+  private_ip_alloc_name   = ["${var.name}-${var.environment}-google-managed-range"]
+  prefix_length           = [16]
+
+  enable_service_networking = false
+
+  #---------------------------------------------------------------------------
+  # Static Routes
+  #---------------------------------------------------------------------------
+  enable_static_route = true
+  static_routes = [
+    {
+      name             = "${var.name}-${var.environment}-default-internet"
+      dest_range       = "0.0.0.0/0"
+      description      = "Default route to the public internet"
+      priority         = 1000
+      next_hop_gateway = "default-internet-gateway"
+    }
+  ]
+
+  #---------------------------------------------------------------------------
+  # Shared VPC 
+  # Enable if this project should act as a Shared VPC host.
+  #---------------------------------------------------------------------------
   google_compute_shared_vpc_host_enabled = false
-  host_project_id                        = null
-  service_project_id                     = null
-
-  # Private IP allocation
-  enable_private_ip_alloc = false
-  private_ip_alloc_name   = ["private-ip-range1"]
-  prefix_length           = [24]
-
-  enable_static_route = false
-  route_name          = "dev-default-internet"
-  route_dest_range    = "0.0.0.0/0"
-  route_priority      = 1000
-  route_tags          = []
-
-  # Enable NAT
-  enable_nat                         = true
-  region                             = "us-central1"
-  nat_ip_allocate_option             = "AUTO_ONLY" # or "MANUAL_ONLY"
-  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-  min_ports_per_vm                   = 64
-  nat_log_enable                     = true
-  nat_log_filter                     = "ALL"
-  nat_network_tier                   = "STANDARD"
-
+  host_project_id                        = ""
+  service_project_id                     = ""
 }

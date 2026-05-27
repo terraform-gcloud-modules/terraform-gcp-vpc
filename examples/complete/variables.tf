@@ -1,21 +1,22 @@
-#-------------------------------------------------------------------------------
-# Google_Provider_variables #
-#-------------------------------------------------------------------------------
-
-variable "gcp_project_id" {
+variable "project_id" {
+  description = "The GCP project ID where all resources will be created."
   type        = string
-  default     = "project-1"
-  description = "Google Cloud project ID"
 }
 
-variable "gcp_region" {
+variable "name" {
+  description = "Base name used for all resources (e.g. myapp, platform)."
   type        = string
-  default     = "europe-west3"
-  description = "Google Cloud region"
+  default     = "myapp"
 }
 
-variable "gcp_zone" {
+variable "environment" {
+  description = "Environment name (dev, staging, prod)."
   type        = string
-  default     = "Europe-west3-c"
-  description = "Google Cloud zone"
+  default     = "dev"
+}
+
+variable "region" {
+  description = "GCP region for the Cloud Router and NAT gateway."
+  type        = string
+  default     = "us-central1"
 }
