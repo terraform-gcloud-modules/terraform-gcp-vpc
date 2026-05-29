@@ -1,6 +1,7 @@
 variable "project_id" {
   description = "The GCP project ID where all resources will be created."
   type        = string
+  default     = null
 }
 
 variable "name" {
