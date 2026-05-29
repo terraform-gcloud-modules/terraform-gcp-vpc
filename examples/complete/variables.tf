@@ -21,3 +21,9 @@ variable "region" {
   type        = string
   default     = "us-central1"
 }
+
+variable "label_order" {
+  type        = list(string)
+  default     = ["name", "environment"]
+  description = "Order of segments in the label ID, e.g. [\"name\", \"environment\"]."
+}
