@@ -18,5 +18,7 @@ jobs:
       provider: gcp
       enable_plan: true
       show_plan: false
+      project_id: ${{ vars.GCP_PROJECT_ID }}
     secrets: 
-      BUILD_ROLE: ${{ secrets.BUILD_ROLE }}
+      WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+      SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
