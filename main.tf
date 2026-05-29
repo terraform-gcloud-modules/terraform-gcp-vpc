@@ -4,7 +4,7 @@
 #-------------------------------------------------------------------------------
 
 module "labels" {
-  source = "git::https://github.com/terraform-gcloud-modules/terraform-gcp-labels.git?ref=master"
+  source = "git::https://github.com/terraform-gcloud-modules/terraform-gcp-labels.git?ref=v0.0.1"
 
   name        = var.name
   environment = var.environment
