@@ -43,25 +43,6 @@ module "vpc" {
   nat_log_enable                      = true
   nat_log_filter                      = "ERRORS_ONLY"
 
-  # Uncomment for MANUAL_ONLY NAT IPs:
-  # nat_ip_allocate_option = "MANUAL_ONLY"
-  # nat_ips                = ["<self_link_of_reserved_static_ip>"]
-
-  # Uncomment to NAT only specific subnets:
-  # source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
-  # nat_subnetworks = [
-  #   {
-  #     name                    = "projects/my-project/regions/us-central1/subnetworks/my-subnet"
-  #     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
-  #   }
-  # ]
-
-  # BGP config — required if you attach a VPN or Interconnect to this router
-  # router_bgp = {
-  #   asn            = 64514
-  #   advertise_mode = "DEFAULT"
-  # }
-
   #---------------------------------------------------------------------------
   # Private IP Allocation for Cloud SQL 
   #---------------------------------------------------------------------------
