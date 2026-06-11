@@ -1,13 +1,22 @@
+# ------------------------------------------------------------------------------
+# Provider Configuration
+# ------------------------------------------------------------------------------
+
 provider "google" {
   project = var.project_id
   region  = var.region
 }
+
+# ------------------------------------------------------------------------------
+# Resources
+# ------------------------------------------------------------------------------
 
 locals {
   name        = var.name
   environment = var.environment
   label_order = var.label_order
 }
+
 module "vpc" {
   source      = "../.."
   name        = local.name
@@ -21,6 +30,7 @@ module "vpc" {
   #---------------------------------------------------------------------------
   # VPC Network
   #---------------------------------------------------------------------------
+
   description                     = "Core VPC for ${var.name} (${var.environment})"
   auto_create_subnetworks         = false
   routing_mode                    = "REGIONAL"
@@ -32,6 +42,7 @@ module "vpc" {
   # Cloud NAT + Cloud Router
   # Subnets will be NATed via their subnet module referencing this VPC.
   #---------------------------------------------------------------------------
+
   enable_nat                          = true
   region                              = var.region
   nat_ip_allocate_option              = "AUTO_ONLY"
@@ -46,6 +57,7 @@ module "vpc" {
   #---------------------------------------------------------------------------
   # Private IP Allocation for Cloud SQL 
   #---------------------------------------------------------------------------
+
   enable_private_ip_alloc = true
   private_ip_alloc_name   = ["${var.name}-${var.environment}-google-managed-range"]
   prefix_length           = [16]
@@ -55,6 +67,7 @@ module "vpc" {
   #---------------------------------------------------------------------------
   # Static Routes
   #---------------------------------------------------------------------------
+
   enable_static_route = true
   static_routes = [
     {
@@ -70,6 +83,7 @@ module "vpc" {
   # Shared VPC 
   # Enable if this project should act as a Shared VPC host.
   #---------------------------------------------------------------------------
+
   google_compute_shared_vpc_host_enabled = false
   host_project_id                        = ""
   service_project_id                     = ""

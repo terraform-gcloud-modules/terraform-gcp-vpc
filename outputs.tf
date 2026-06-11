@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Output_VPC_ID #
+# Output VPC
 #-------------------------------------------------------------------------------
 
 output "vpc_id" {
@@ -20,11 +20,6 @@ output "vpc_self_link" {
 output "vpc_gateway_ipv4" {
   description = "The default IPv4 gateway address of the network."
   value       = try(google_compute_network.vpc[0].gateway_ipv4, null)
-}
-
-output "vpc_numeric_id" {
-  description = "The numeric ID of the VPC network."
-  value       = try(google_compute_network.vpc[0].numeric_id, null)
 }
 
 output "vpc_routing_mode" {

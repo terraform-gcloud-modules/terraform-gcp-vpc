@@ -45,28 +45,6 @@ module "vpc" {
 }
 ```
 
-### Cloud NAT with MANUAL_ONLY IPs
-
-```hcl
-module "vpc" {
-  source = "github.com/terraform-gcloud-modules/terraform-gcp-vpc"
-
-  name        = "myapp"
-  environment = "prod"
-  label_order = ["name", "environment"]
-
-  project_id = var.project_id
-
-  enable_nat             = true
-  region                 = "us-central1"
-  nat_ip_allocate_option = "MANUAL_ONLY"
-  nat_ips                = [google_compute_address.nat_ip.self_link]
-
-  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-}
-```
-
-
 See [`examples/complete`](examples/complete) for a runnable example covering all features.
 
 ## Module Architecture
