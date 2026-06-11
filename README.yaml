@@ -5,19 +5,19 @@
 #
 
 # Name of this project
-name : Terraform GCP Module Template
+name :  Terraform GCP VPC Module 
 
 # License of this project
 license: "APACHE"
 
 # Canonical GitHub repo
-github_repo: terraform-gcp-modules/terraform-module-template
+github_repo: terraform-gcloud-modules/terraform-gcp-vpc
 
 # Badges to display
 badges:
   - name: "Terraform"
-    image: "https://img.shields.io/badge/Terraform-v0.13-green"
-    url: "https://www.terraform.io"
+    image: "https://img.shields.io/github/release/terraform-gcloud-modules/terraform-gcp-vpc.svg"
+    url:  "https://github.com/terraform-gcloud-modules/terraform-gcp-vpc/releases/latest"
   - name: "Licence"
     image: "https://img.shields.io/badge/License-APACHE-blue.svg"
     url: "LICENSE.md"
@@ -29,21 +29,32 @@ badges:
 prerequesties:
   - name: Terraform
     url: https://learn.hashicorp.com/terraform/getting-started/install.html
-    version: ">= 1.6.6"
+    version: ">= 1.14, < 2.0"
 
 providers:
   - name: google
     url: https://cloud.google.com/
-    version: ">= 6.49.1"
+    version: ">= 4.64, < 8"
 
 # description of this project
 description: |-
-  Terraform GCP Module Template to create new modules using this as baseline
+  Terraform module to create VPC resource on google.
 
-# How to use this project
 # How to use this project
 usage: |-
   Here are some examples of how you can use this module in your inventory structure:
   ```hcl
-    locals {}
-    ```
+  module "vpc" {
+    source      = "../.."
+    name        = local.name
+    environment = local.environment
+    label_order = local.label_order
+    project_id  = var.project_id
+
+    module_enabled                 = true
+    google_compute_network_enabled = true
+
+    auto_create_subnetworks = false
+    routing_mode            = "REGIONAL"
+  }
+  ```
