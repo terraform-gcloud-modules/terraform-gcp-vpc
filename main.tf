@@ -37,13 +37,23 @@ resource "google_compute_network" "vpc" {
 #-------------------------------------------------------------------------------
 
 resource "google_compute_shared_vpc_host_project" "host" {
-  count   = var.google_compute_shared_vpc_host_enabled && var.module_enabled ? 1 : 0
+  count = (
+    var.google_compute_shared_vpc_host_enabled &&
+    var.module_enabled &&
+    var.host_project_id != ""
+  ) ? 1 : 0
   project = var.host_project_id
 }
 
 resource "google_compute_shared_vpc_service_project" "service1" {
-  count           = var.google_compute_shared_vpc_host_enabled && var.module_enabled ? 1 : 0
-  host_project    = google_compute_shared_vpc_host_project.host[count.index].project
+  count = (
+    var.google_compute_shared_vpc_host_enabled &&
+    var.module_enabled &&
+    var.host_project_id != "" &&
+    var.service_project_id != ""
+  ) ? 1 : 0
+
+  host_project    = google_compute_shared_vpc_host_project.host[0].project
   service_project = var.service_project_id
 }
 

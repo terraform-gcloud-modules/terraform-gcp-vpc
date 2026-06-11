@@ -45,21 +45,16 @@ usage: |-
   Here are some examples of how you can use this module in your inventory structure:
   ```hcl
   module "vpc" {
-  source = "../.."
+    source      = "../.."
+    name        = local.name
+    environment = local.environment
+    label_order = local.label_order
+    project_id  = var.project_id
 
-  module_enabled                 = true
-  google_compute_network_enabled = true
-  enable_service_networking      = false
-  name        = local.name
-  description = "VPC network for dev and testing workloads"
-  project_id  = local.project_id
-  environment = local.environment
-  label_order = local.label_order
-  auto_create_subnetworks         = false
-  routing_mode                    = "GLOBAL"
-  mtu                             = 1460
-  delete_default_routes_on_create = false
-  enable_ula_internal_ipv6        = false
-  internal_ipv6_range             = null
+    module_enabled                 = true
+    google_compute_network_enabled = true
+
+    auto_create_subnetworks = false
+    routing_mode            = "REGIONAL"
   }
   ```
